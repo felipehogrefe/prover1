@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Sentence implements Cloneable{
 	private boolean not;
 	private boolean isAto;
@@ -141,6 +143,46 @@ public class Sentence implements Cloneable{
 			str+=")";
 		}
 		return str;
+	}
+	
+	private static ArrayList<Integer> values;
+	
+	public boolean valCount(){
+		values = new ArrayList<>();
+		return this.val();
+	}
+	
+	public boolean val(){
+		if(this.isAto()){
+			for(int i=0;i<values.size();i++){
+				if(this.value==values.get(i)){
+					return true;
+				}
+			}
+			values.add(this.value);
+			return false;
+		}else if(this.sLeft.val()){
+			return true;
+		}else if(this.sRight.val()){
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean checkAtoValues(){
+		if(this.isAto()){
+			return false;
+		}else if(this.sLeft.isAto&&this.sRight.isAto){
+			if(this.sLeft.value==this.sRight.value){
+				return true;
+			}
+		}else if(this.sLeft.checkAtoValues()){
+			return true;
+		}else if(this.sRight.checkAtoValues()){
+			return true;
+		}
+		return false;
 	}
 	
 	public Sentence getLastL(){

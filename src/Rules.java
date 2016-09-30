@@ -1,12 +1,18 @@
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Rules {
 	static boolean arrayCleared=false;
+	static boolean consistent=false;
 	Sentence newSL;
 	static ArrayList<SentSequence> everySent = new ArrayList<SentSequence>();
+	static ArrayList<SentSequence> pivoSent = new ArrayList<SentSequence>();
 	
 	public static void clearArray(){
 		everySent = new ArrayList<SentSequence>();
+		pivoSent = new ArrayList<SentSequence>();
+		consistent=false;
 	}
 	
 	
@@ -15,18 +21,24 @@ public class Rules {
 		//sempre que adicionar um verdadeiro ou falso printa a sequencia ate ele
 		if(checkList(s)){
 			if(s.getThis().toString().equals("T")){
+				consistent = true;
 				System.out.println("verdadeiro!");
 				System.out.println("sentenca: ");
 				s.printSent();
 			}
 			if(s.getThis().toString().equals("F")){
+				consistent = true;
 				System.out.println("falso!");
 				System.out.println("sentenca: ");
 				s.printSent();
 			}
-			System.out.println(everySent.size());
-			everySent.add(s);
-			return true;
+			if(checkPivo(s)){
+				everySent.add(s);
+				if(arrayCleared){
+					pivoSent.add(s);
+				}
+				return true;
+			}
 		}
 		return false;
 	}
@@ -34,6 +46,14 @@ public class Rules {
 	private static boolean checkList(SentSequence s) {
 		for(int j=0;j<everySent.size();j++){
 			if(everySent.get(j).getThis().toString().equals(s.getThis().toString())){
+				return false;
+			}
+		}
+		return true;
+	}
+	private static boolean checkPivo(SentSequence s) {
+		for(int j=0;j<pivoSent.size();j++){
+			if(pivoSent.get(j).getThis().toString().equals(s.getThis().toString())){
 				return false;
 			}
 		}
@@ -49,17 +69,7 @@ public class Rules {
 			
 			while(added){
 				added=false;
-				Sentence newS = Rules.rule1(ns);
-				added = tryToAdd(ss, added, ns, newS,1);
-				if(arrayCleared){
-					break;
-				}
-				newS = Rules.rule2(ns);
-				added = tryToAdd(ss, added, ns, newS,2);
-				if(arrayCleared){
-					break;
-				}
-				newS = Rules.rule67ab(ns);
+				Sentence newS = Rules.rule67ab(ns);
 				added = tryToAdd(ss, added, ns, newS,6);
 				if(arrayCleared){
 					break;
@@ -84,11 +94,6 @@ public class Rules {
 				if(arrayCleared){
 					break;
 				}
-				newS = Rules.rule11(ns);
-				added = tryToAdd(ss, added, ns, newS,11);	
-				if(arrayCleared){
-					break;
-				}		
 			}	
 	
 			for(int j=0;j<everySent.size();j++){
@@ -103,10 +108,7 @@ public class Rules {
 		int innerCount=0;
 		arrayCleared=false;
 		if(!ss.getThis().isAto()&&!ss.isExpandedIn()){
-
-			//if(!ss.isExpandedIn()){
 			ss.expandIn();
-			
 			Sentence nsL = ss.getThis().getSL();
 			while(!nsL.isAto()){
 				boolean added = true;
@@ -115,23 +117,7 @@ public class Rules {
 				if(!nsL.checkSent(ss.getThis())){	
 					while(added){
 						added=false;
-						Sentence newSL = Rules.rule1(nsL); //os metodos rule retornam um clone se mudou, ou o msm item
-						Sentence ns = (Sentence) ss.getThis().clone();
-						//aqui eu altero o SL para o recem obtido
-						ns.setInnerSL(newSL,innerCount);					
-						added = tryToAdd(ss, added, ss.getThis(), ns,1);
-						if(arrayCleared){
-							break;
-						}
 						
-						Sentence newSL2 = Rules.rule2(nsL);
-						Sentence ns2 = (Sentence) ss.getThis().clone();
-						ns2.setInnerSL(newSL2,innerCount);					
-						added = tryToAdd(ss, added, ss.getThis(), ns2,2);
-						if(arrayCleared){
-							break;
-						}
-
 						Sentence newSL6 = Rules.rule67ab(nsL);
 						Sentence ns6 = (Sentence) ss.getThis().clone();
 						ns6.setInnerSL(newSL6,innerCount);
@@ -171,14 +157,6 @@ public class Rules {
 						if(arrayCleared){
 							break;
 						}
-						
-						Sentence newSL11 = Rules.rule11(nsL);
-						Sentence ns11 = (Sentence) ss.getThis().clone();
-						ns11.setInnerSL(newSL11,innerCount);					
-						added = tryToAdd(ss, added, ss.getThis(), ns11,11);
-						if(arrayCleared){
-							break;
-						}
 					}
 				}
 				if(arrayCleared){
@@ -197,11 +175,9 @@ public class Rules {
 
 	private static boolean tryToAdd(SentSequence ss, boolean added, Sentence ns, Sentence newSL,int i) {
 		SentSequence newSS;
-		//System.out.println(newSL.checkSent(ns));
 		if(!newSL.checkSent(ns)){
 			//checa se apos a aplicacao da regra ouve mudan�a na senten�a
 			//printa a regra aplicada
-			//System.out.println(i);
 			newSS = new SentSequence(newSL,ss,i);	
 			if(!added){
 				//se o valor for false, pode ser alterado, se for true nao pode
@@ -240,8 +216,12 @@ public class Rules {
 	public static Sentence rule3ab(Sentence s) throws CloneNotSupportedException{
 		Sentence cs = (Sentence) s.clone();
 		if(!s.isAto() && (s.getOpr()==0 || s.getOpr()==1)){
-			Sentence n3 = new Sentence(s.getSR(),s.getSL(),cs.getOpr(),cs.getNot());
-			return n3;
+			if(s.getSR().isAto()){
+				if(s.getSL().isAto()){
+					return s;
+				}
+			}
+			return cs.swap();
 		}
 		return s;
 	}
@@ -252,7 +232,11 @@ public class Rules {
 			Sentence inner = (Sentence) cs.getSL();
 			if(inner.getOpr()==cs.getOpr() && (inner.getOpr()==0 || inner.getOpr()==1) && (!inner.isAto())){
 				Sentence newS4 = new Sentence(inner.getSR(),cs.getSR(),cs.getOpr(),false);
-				Sentence newS5 = new Sentence(inner.getSL(),newS4,cs.getOpr(),false);
+				Sentence newS5 = new Sentence(inner.getSL(),newS4,cs.getOpr(),false);/*
+				if(newS5.checkAtoValues()){
+					everySent = new ArrayList<SentSequence>();
+					arrayCleared=true;
+				}*/
 				return newS5;
 			}
 		}
@@ -262,11 +246,11 @@ public class Rules {
 	public static Sentence rule5ab(Sentence s) throws CloneNotSupportedException{
 		Sentence cs = (Sentence) s.clone();
 		Sentence inner = cs.getSR();
-		if(inner==null||cs.getSL()==null){
+		if(inner==null||cs.getSL()==null||!s.valCount()){
 			return s;
 		}
 		if(!inner.isAto() && cs.getSL().isAto()){
-			if((cs.getSL().getValue()==0)||(cs.getSL().getValue()==1)){
+			if((cs.getSL().getValue()==0)||(cs.getSL().getValue()==1)||(cs.getSR().getValue()==1)||(cs.getSR().getValue()==1)){
 				return s;
 			}
 			if(((inner.getOpr()==0 && cs.getOpr()==1))||((inner.getOpr()==1 && cs.getOpr()==0))){
@@ -286,7 +270,15 @@ public class Rules {
 				Sentence s3 = new Sentence(s1,s2L,cs.getOpr(),false);
 				Sentence s4 = new Sentence(s1,s2R,cs.getOpr(),false);
 				Sentence s5 = new Sentence(s3,s4,inner.getOpr(),false);
+				if(s3.checkAtoValues()){
+					everySent = new ArrayList<SentSequence>();
+					arrayCleared=true;
+				}else if(s4.checkAtoValues()){
+					everySent = new ArrayList<SentSequence>();
+					arrayCleared=true;
+				}
 				return s5;
+				
 			}
 		}
 		return s;
@@ -294,13 +286,16 @@ public class Rules {
 	
 	public static Sentence rule67ab(Sentence s) throws CloneNotSupportedException{
 		if(!s.isAto()){
-
 			if(s.getSL().checkSent(s.getSR())&&(s.getOpr()==1||s.getOpr()==0)){
+				//caso as duas sejam iguais, retorna uma delas
 				return (Sentence) s.getSL().clone();
-			}else{
+			}
+			if(s.getSR().isAto()){
 				switch(s.getSR().getValue()){				
 				case 0:
 					if(s.getOpr()==0){
+						everySent = new ArrayList<SentSequence>();
+						arrayCleared=true;
 						return (Sentence) s.getSL().clone();
 					}else if(s.getOpr()==1){
 						//TODO aqui p ^ F <=> F
@@ -309,8 +304,10 @@ public class Rules {
 						return (Sentence) s.getSR().clone();
 					}
 					break;
-				case 1:	
+				case 1:
 					if(s.getOpr()==1){
+						everySent = new ArrayList<SentSequence>();
+						arrayCleared=true;
 						return (Sentence) s.getSL().clone();
 					}else if(s.getOpr()==0){
 						//TODO aqui: p v V <=> V
@@ -321,7 +318,39 @@ public class Rules {
 					}
 					break;
 				default:
-					return s;
+					break;
+				}
+			}
+			if(s.getSL().isAto()){
+				switch(s.getSL().getValue()){				
+				case 0:
+					if(s.getOpr()==0){
+						//F v p <=> p
+						everySent = new ArrayList<SentSequence>();
+						arrayCleared=true;
+						return (Sentence) s.getSR().clone();
+					}else if(s.getOpr()==1){
+						//TODO aqui F ^ p <=> F
+						everySent = new ArrayList<SentSequence>();
+						arrayCleared=true;
+						return (Sentence) s.getSL().clone();
+					}
+					break;
+				case 1:
+					if(s.getOpr()==1){
+						//V ^ p <=> p
+						everySent = new ArrayList<SentSequence>();
+						arrayCleared=true;	
+						return (Sentence) s.getSR().clone();
+					}else if(s.getOpr()==0){
+						//TODO aqui: V v p <=> V
+						everySent = new ArrayList<SentSequence>();
+						arrayCleared=true;	
+						return (Sentence) s.getSL().clone();
+					}
+					break;
+				default:
+					break;
 				}
 			}
 		}
@@ -337,8 +366,12 @@ public class Rules {
 			Sentence asL = (Sentence)cs.getSL();
 			Sentence asR = (Sentence)cs.getSR();
 			Sentence newAs= null;
-			if(asL.getValue()==asR.getValue() && (asR.getNot()||asL.getNot())){
-				if(asL.getNot()){
+			if(asL.getValue()==asR.getValue()){
+				if((asL.checkSent(asR))){
+//					s.print();
+					//se forem iguais retorna uma delas
+					everySent = new ArrayList<SentSequence>();
+					arrayCleared=true;
 					return asL;
 				}
 				int value=0;

@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Main {
 
 	public static void main(String[] args) throws CloneNotSupportedException {
-		long m= System.currentTimeMillis();
+		long m = System.currentTimeMillis();
 		
 		Sentence s1 = new Sentence(2,false);//A
 		Sentence s2 = new Sentence(3,false);//B
@@ -68,19 +68,19 @@ public class Main {
 		Sentence s61 = new Sentence(s4,s1,1,false);//((A>B)^A)
 		//TESTE M:-------------------------------------------------------------------------
 		Sentence tm = new Sentence (s61,s2,2,false);//((A>B)^A)>B
-		SentSequence ssm = new SentSequence(tm,null,0);
+		SentSequence ssm = new SentSequence(tm.negate().negate(),null,0);
 		//TESTE 0:-------------------------------------------------------------------------
 		Sentence t0 = new Sentence(s60,s2,2,false);//((BvA)^~A)>B
-		SentSequence ss0 = new SentSequence(t0,null,0);
+		SentSequence ss0 = new SentSequence(t0.negate().negate(),null,0);
 		//TESTE 1:-------------------------------------------------------------------------
 		Sentence t1 = new Sentence(s7,s3,2,false);//((A^(B>C))^(A>C))>C
-		SentSequence ss1 = new SentSequence(t1,null,0);
+		SentSequence ss1 = new SentSequence(t1.negate().negate(),null,0);
 		//TESTE 2:-------------------------------------------------------------------------
 		Sentence t2 = new Sentence(s11,s3,2,false);//((((A>(B>C))^~~A)^B)>C)
-		SentSequence ss2 = new SentSequence(t2,null,0);
+		SentSequence ss2 = new SentSequence(t2.negate().negate(),null,0);
 		//TESTE 3:-------------------------------------------------------------------------
 		Sentence t3 = new Sentence(s17,s15,2,false);//((((2v3)^(2v4))^~2)>(3^4))
-		SentSequence ss3 = new SentSequence(t3,null,0);
+		SentSequence ss3 = new SentSequence(t3.negate().negate(),null,0);
 		//TESTE 4:-------------------------------------------------------------------------
 		Sentence t4 = new Sentence(s20,s21,2,false);//(((A>B)^((A>B)>(B>A)))>(A<>B))
 		SentSequence ss4 = new SentSequence(t4.negate().negate(),null,0);
@@ -97,12 +97,15 @@ public class Main {
 		Sentence t8 = new Sentence(s58,s35,2,false);
 		SentSequence ss8 = new SentSequence(t8.negate().negate(),null,0);
 		//---------------------------------------------------------------------------------
-				
-		/*Rules.addToArray(ssm);
+			
+		Rules.addToArray(ssm);
 		System.out.println("TESTE M.P.:");
 		try {
 			Rules.itera(ssm);
-			Rules.clearArray();			
+			if(!Rules.consistent){
+				System.out.println("Inconsistente");
+			}
+			Rules.clearArray();	
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
 		}
@@ -110,6 +113,9 @@ public class Main {
 		System.out.println("TESTE 0:");
 		try {
 			Rules.itera(ss0);
+			if(!Rules.consistent){
+				System.out.println("Inconsistente");
+			}
 			Rules.clearArray();			
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
@@ -118,11 +124,10 @@ public class Main {
 		System.out.println("TESTE 1:");
 		try {
 			Rules.itera(ss1);
-			for(SentSequence i : Rules.everySent){
-				//System.out.print(i.rule+" "+i.isExpanded()+" "+i.isExpanded()+" ");
-				i.getThis().print();
+			if(!Rules.consistent){
+				System.out.println("Inconsistente");
 			}
-			//Rules.clearArray();			
+			Rules.clearArray();			
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
 		}
@@ -130,6 +135,9 @@ public class Main {
 		System.out.println("TESTE 2:");
 		try {
 			Rules.itera(ss2);
+			if(!Rules.consistent){
+				System.out.println("Inconsistente");
+			}
 			Rules.clearArray();			
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
@@ -138,22 +146,31 @@ public class Main {
 		System.out.println("TESTE 3:");
 		try {
 			Rules.itera(ss3);
+			if(!Rules.consistent){
+				System.out.println("Inconsistente");
+			}
 			Rules.clearArray();			
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
-		}*/
+		}
 		Rules.addToArray(ss4);
 		System.out.println("TESTE 4:");
 		try {
 			Rules.itera(ss4);
+			if(!Rules.consistent){
+				System.out.println("Inconsistente");
+			}
 			Rules.clearArray();			
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
-		}/*
+		}
 		Rules.addToArray(ss5);
 		System.out.println("TESTE 5:");
 		try {
 			Rules.itera(ss5);
+			if(!Rules.consistent){
+				System.out.println("Inconsistente");
+			}
 			Rules.clearArray();
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
@@ -162,6 +179,9 @@ public class Main {
 		System.out.println("TESTE 6:");
 		try {
 			Rules.itera(ss6);
+			if(!Rules.consistent){
+				System.out.println("Inconsistente");
+			}
 			Rules.clearArray();
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
@@ -170,6 +190,9 @@ public class Main {
 		System.out.println("TESTE 7:");
 		try {
 			Rules.itera(ss7);
+			if(!Rules.consistent){
+				System.out.println("Inconsistente");
+			}
 			Rules.clearArray();			
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
@@ -178,9 +201,14 @@ public class Main {
 		System.out.println("TESTE 8:");
 		try {
 			Rules.itera(ss8);
+			if(!Rules.consistent){
+				System.out.println("Inconsistente");
+			}
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
-		}*/
+		}
+		
+		System.out.println("Tempo de execução: "+(System.currentTimeMillis()-m)+" ms");
 	}
 
 }
