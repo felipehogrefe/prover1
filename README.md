@@ -10,7 +10,7 @@ Para sentenças pequenas não há problema, mas quando temos quatro ou as vezes 
 
 Por fim, para alcançar o objetivo de mostrar a sequência percorrida temos uma estrutura de dados em que cada nova sequência produziada pelas regras aponta para o sua anterior.
 
-Exemplo de saída:
+Exemplo de saída (ordenado de  baixo para cima):
 
 6: T
 
